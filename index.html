@@ -1,0 +1,855 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>BEER'S FACTORY — Carte des boissons</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg:#D6DDD6;
+      --paper:#EEF2EE;
+      --ink:#1A1C23;
+      --muted:#5E6370;
+      --line:rgba(94,99,112,.25);
+      --accent:#CA9F73;
+
+      --r:16px;
+      --shadow:0 10px 30px rgba(0,0,0,.08);
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      background:var(--bg);
+      color:var(--ink);
+    }
+
+    .wrap{
+      max-width:960px;
+      margin:0 auto;
+      padding:0 14px 64px;
+    }
+
+    header{
+      text-align:center;
+      padding:26px 10px 12px;
+    }
+    .brand{
+      font-family:Oswald,system-ui;
+      letter-spacing:.06em;
+      font-size:34px;
+      line-height:1.1;
+      margin:0;
+    }
+    .sub{
+      color:var(--muted);
+      font-size:13px;
+      margin-top:6px;
+    }
+
+    .happy{
+      margin:14px auto 10px;
+      background:var(--paper);
+      border-left:5px solid var(--accent);
+      border-radius:var(--r);
+      padding:12px 14px;
+      box-shadow:var(--shadow);
+    }
+    .happy strong{font-weight:800}
+    .happy .small{color:var(--muted); font-size:13px; margin-top:6px}
+
+    .cats{
+      position:sticky;
+      top:0;
+      z-index:20;
+      padding:10px 0 10px;
+      background:linear-gradient(to bottom, var(--bg) 80%, rgba(214,221,214,0));
+      backdrop-filter:saturate(120%) blur(6px);
+    }
+    .catsRow{
+      display:flex;
+      gap:8px;
+      overflow:auto;
+      padding:6px 2px 10px;
+      scrollbar-width:none;
+    }
+    .catsRow::-webkit-scrollbar{display:none}
+    .cat{
+      flex:none;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:9px 12px;
+      border-radius:999px;
+      background:rgba(238,242,238,.9);
+      color:var(--ink);
+      text-decoration:none;
+      border:1px solid rgba(0,0,0,.06);
+      transition:transform .2s ease, background .2s ease, border-color .2s ease;
+      font-size:14px;
+      box-shadow:0 6px 16px rgba(0,0,0,.06);
+      will-change:transform;
+    }
+    .cat:active{transform:scale(.98)}
+    .cat.is-active{
+      background:var(--accent);
+      border-color:rgba(0,0,0,.15);
+      transform:translateY(-1px);
+    }
+
+    section{
+      padding:18px 2px 0;
+      scroll-margin-top:92px;
+    }
+    .secHead{
+      display:flex;
+      align-items:baseline;
+      justify-content:space-between;
+      gap:10px;
+      margin:16px 2px 10px;
+    }
+    .secTitle{
+      font-family:Oswald,system-ui;
+      letter-spacing:.05em;
+      margin:0;
+      font-size:22px;
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+    .secHint{
+      color:var(--muted);
+      font-size:12px;
+      white-space:nowrap;
+    }
+    .divider{
+      height:1px;
+      background:var(--line);
+      margin:8px 0 12px;
+    }
+
+    .list{
+      display:grid;
+      gap:10px;
+    }
+    .card{
+      background:var(--paper);
+      border-radius:var(--r);
+      padding:12px 12px;
+      border:1px solid rgba(0,0,0,.06);
+      box-shadow:0 10px 22px rgba(0,0,0,.06);
+    }
+
+    .itemTop{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+    }
+    .left{
+      display:flex;
+      align-items:flex-start;
+      gap:10px;
+      min-width:0;
+    }
+    .ico{font-size:22px; line-height:1; margin-top:2px}
+    .nameWrap{min-width:0}
+    .name{
+      font-weight:800;
+      font-size:15px;
+      margin:0;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .meta{
+      margin-top:3px;
+      color:var(--muted);
+      font-size:12px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .price{
+      font-weight:900;
+      color:var(--accent);
+      white-space:nowrap;
+      font-size:14px;
+    }
+
+    details{
+      margin-top:10px;
+      border-top:1px solid var(--line);
+      padding-top:10px;
+    }
+    summary{
+      list-style:none;
+      cursor:pointer;
+      user-select:none;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      font-weight:800;
+      color:var(--ink);
+    }
+    summary::-webkit-details-marker{display:none}
+    .chev{
+      width:28px;
+      height:28px;
+      border-radius:999px;
+      display:grid;
+      place-items:center;
+      border:1px solid rgba(0,0,0,.08);
+      background:rgba(255,255,255,.35);
+      transition:transform .25s ease;
+      flex:none;
+    }
+    details[open] .chev{transform:rotate(180deg)}
+    .more{
+      padding-top:10px;
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.45;
+    }
+    .more .kv{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      padding:6px 0;
+      border-bottom:1px dashed rgba(94,99,112,.25);
+    }
+    .more .kv:last-child{border-bottom:none}
+    .tag{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      background:rgba(202,159,115,.18);
+      border:1px solid rgba(202,159,115,.35);
+      color:var(--ink);
+      padding:6px 10px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:800;
+      margin-top:10px;
+    }
+
+    .reveal{
+      opacity:0;
+      transform:translateY(14px);
+      transition:opacity .45s ease, transform .45s cubic-bezier(.2,.8,.2,1);
+      will-change:opacity, transform;
+    }
+    .reveal.is-visible{
+      opacity:1;
+      transform:translateY(0);
+    }
+
+    .toTop{
+      position:fixed;
+      right:16px;
+      bottom:16px;
+      width:46px;
+      height:46px;
+      border:none;
+      border-radius:999px;
+      background:var(--accent);
+      color:#111;
+      font-size:20px;
+      font-weight:900;
+      box-shadow:0 18px 30px rgba(0,0,0,.18);
+      opacity:0;
+      pointer-events:none;
+      transform:translateY(8px);
+      transition:opacity .25s ease, transform .25s ease;
+    }
+    .toTop.is-visible{
+      opacity:1;
+      pointer-events:auto;
+      transform:translateY(0);
+    }
+    .toTop:active{transform:scale(.98)}
+
+    footer{
+      margin-top:30px;
+      text-align:center;
+      color:var(--muted);
+      font-size:12px;
+      padding:22px 0 10px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+
+    <header class="reveal">
+      <h1 class="brand">BEER'S FACTORY</h1>
+      <div class="sub">Carte des boissons • Menu digital</div>
+    </header>
+
+    <div class="happy reveal" id="happy">
+      🎉 <strong>Happy Hour</strong> — <strong>17h → 18h30</strong><br>
+      <div class="small">Toutes les pintes & cocktails à <strong>7€</strong>.</div>
+    </div>
+
+    <nav class="cats" id="cats">
+      <div class="catsRow">
+        <a class="cat" href="#bieres" data-target="bieres">🍺 Bières</a>
+        <a class="cat" href="#softs" data-target="softs">💧 Softs</a>
+        <a class="cat" href="#jus" data-target="jus">🍊 Jus</a>
+        <a class="cat" href="#limonades" data-target="limonades">🍋 Limonades</a>
+        <a class="cat" href="#cocktails" data-target="cocktails">🍸 Cocktails</a>
+        <a class="cat" href="#mocktails" data-target="mocktails">🥤 Mocktails</a>
+        <a class="cat" href="#digestifs" data-target="digestifs">🥃 Digestifs</a>
+        <a class="cat" href="#whisky" data-target="whisky">🌾 Whisky</a>
+        <a class="cat" href="#vins" data-target="vins">🍷 Vins</a>
+        <a class="cat" href="#champagne" data-target="champagne">🥂 Champagne</a>
+      </div>
+    </nav>
+
+    <!-- ========== BIERES ========== -->
+    <section id="bieres" class="reveal">
+      <div class="secHead">
+        <h2 class="secTitle">🍺 Bières</h2>
+        <div class="secHint">Tailles & prix</div>
+      </div>
+      <div class="divider"></div>
+
+      <div class="list">
+
+        <div class="card">
+          <div class="itemTop">
+            <div class="left">
+              <div class="ico">🍺</div>
+              <div class="nameWrap">
+                <p class="name">Paix Dieu</p>
+                <div class="meta">10% • Bière blonde à la pression</div>
+              </div>
+            </div>
+            <div class="price">5€ → 9€</div>
+          </div>
+          <details>
+            <summary><span>Voir les tailles</span><span class="chev">⌄</span></summary>
+            <div class="more">
+              <div class="kv"><span>25cl</span><span>5€</span></div>
+              <div class="kv"><span>33cl</span><span>6.50€</span></div>
+              <div class="kv"><span>50cl</span><span>9€</span></div>
+            </div>
+          </details>
+        </div>
+
+        <div class="card">
+          <div class="itemTop">
+            <div class="left">
+              <div class="ico">🍻</div>
+              <div class="nameWrap">
+                <p class="name">Bon Secours Prestige</p>
+                <div class="meta">9% • Bière triple</div>
+              </div>
+            </div>
+            <div class="price">4.50€ → 8€</div>
+          </div>
+          <details>
+            <summary><span>Voir les tailles</span><span class="chev">⌄</span></summary>
+            <div class="more">
+              <div class="kv"><span>25cl</span><span>4.50€</span></div>
+              <div class="kv"><span>33cl</span><span>5.90€</span></div>
+              <div class="kv"><span>50cl</span><span>8€</span></div>
+            </div>
+          </details>
+        </div>
+
+        <div class="card">
+          <div class="itemTop">
+            <div class="left">
+              <div class="ico">🍺</div>
+              <div class="nameWrap">
+                <p class="name">Bon Secours Tradition</p>
+                <div class="meta">8% • Bière blonde</div>
+              </div>
+            </div>
+            <div class="price">4.50€ → 8€</div>
+          </div>
+          <details>
+            <summary><span>Voir les tailles</span><span class="chev">⌄</span></summary>
+            <div class="more">
+              <div class="kv"><span>25cl</span><span>4.50€</span></div>
+              <div class="kv"><span>33cl</span><span>5.90€</span></div>
+              <div class="kv"><span>50cl</span><span>8€</span></div>
+            </div>
+          </details>
+        </div>
+
+        <div class="card">
+          <div class="itemTop">
+            <div class="left">
+              <div class="ico">🍾</div>
+              <div class="nameWrap">
+                <p class="name">Bon Secours Héritage</p>
+                <div class="meta">8% • Ambrée (bouteille)</div>
+              </div>
+            </div>
+            <div class="price">5.90€</div>
+          </div>
+          <details>
+            <summary><span>Voir les détails</span><span class="chev">⌄</span></summary>
+            <div class="more">
+              <div class="kv"><span>33cl</span><span>5.90€</span></div>
+            </div>
+          </details>
+        </div>
+
+        <div class="card">
+          <div class="itemTop">
+            <div class="left">
+              <div class="ico">🥫</div>
+              <div class="nameWrap">
+                <p class="name">Stuut Éphémère</p>
+                <div class="meta">Canette</div>
+              </div>
+            </div>
+            <div class="price">5.50€</div>
+          </div>
+          <details>
+            <summary><span>Voir les détails</span><span class="chev">⌄</span></summary>
+            <div class="more">
+              <div class="kv"><span>33cl</span><span>5.50€</span></div>
+            </div>
+          </details>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ========== SOFTS ========== -->
+    <section id="softs" class="reveal">
+      <div class="secHead">
+        <h2 class="secTitle">💧 Softs</h2>
+        <div class="secHint">Prix à l'unité</div>
+      </div>
+      <div class="divider"></div>
+
+      <div class="list">
+        <div class="card">
+          <div class="itemTop">
+            <div class="left"><div class="ico">💧</div><div class="nameWrap">
+              <p class="name">Saint-Amand</p><div class="meta">50cl</div>
+            </div></div>
+            <div class="price">3.90€</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="itemTop">
+            <div class="left"><div class="ico">🫧</div><div class="nameWrap">
+              <p class="name">Perrier</p><div class="meta">33cl</div>
+            </div></div>
+            <div class="price">3.90€</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="itemTop">
+            <div class="left"><div class="ico">🥤</div><div class="nameWrap">
+              <p class="name">Coca-Cola</p><div class="meta">33cl</div>
+            </div></div>
+            <div class="price">3.70€</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="itemTop">
+            <div class="left"><div class="ico">🥤</div><div class="nameWrap">
+              <p class="name">Coca-Cola Zéro</p><div class="meta">33cl</div>
+            </div></div>
+            <div class="price">3.70€</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="itemTop">
+            <div class="left"><div class="ico">🧋</div><div class="nameWrap">
+              <p class="name">Fuze Tea</p><div class="meta">25cl</div>
+            </div></div>
+            <div class="price">3.50€</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== JUS ========== -->
+    <section id="jus" class="reveal">
+      <div class="secHead">
+        <h2 class="secTitle">🍊 Jus de fruits</h2>
+        <div class="secHint">5.40€</div>
+      </div>
+      <div class="divider"></div>
+
+      <div class="card">
+        <div class="itemTop">
+          <div class="left">
+            <div class="ico">🧃</div>
+            <div class="nameWrap">
+              <p class="name">Sélection de jus</p>
+              <div class="meta">25cl</div>
+            </div>
+          </div>
+          <div class="price">5.40€</div>
+        </div>
+
+        <details>
+          <summary><span>Voir les saveurs</span><span class="chev">⌄</span></summary>
+          <div class="more">
+            <div class="kv"><span>🍊 Jus d'orange pur jus bio</span><span>25cl</span></div>
+            <div class="kv"><span>🍎 Jus de pomme "Marmande" (bio)</span><span>25cl</span></div>
+            <div class="kv"><span>🍑 Nectar (à compléter)</span><span>25cl</span></div>
+            <div class="kv"><span>🥭 Nectar de mangue "Alphonso"</span><span>25cl</span></div>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <!-- ========== LIMONADES ========== -->
+    <section id="limonades" class="reveal">
+      <div class="secHead">
+        <h2 class="secTitle">🍋 Limonades</h2>
+        <div class="secHint">5.70€</div>
+      </div>
+      <div class="divider"></div>
+
+      <div class="list">
+        <div class="card">
+          <div class="itemTop">
+            <div class="left"><div class="ico">🌺</div><div class="nameWrap">
+              <p class="name">Limonade Rhubarbe — Hibiscus</p><div class="meta">33cl</div>
+            </div></div>
+            <div class="price">5.70€</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="itemTop">
+            <div class="left"><div class="ico">🍋</div><div class="nameWrap">
+              <p class="name">Limonade Yuzu</p><div class="meta">33cl</div>
+            </div></div>
+            <div class="price">5.70€</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== COCKTAILS ========== -->
+    <section id="cocktails" class="reveal">
+      <div class="secHead">
+        <h2 class="secTitle">🍸 Cocktails</h2>
+        <div class="secHint">8€</div>
+      </div>
+      <div class="divider"></div>
+
+      <div class="list">
+        <div class="card">
+          <div class="itemTop">
+            <div class="left"><div class="ico">🍊</div><div class="nameWrap">
+              <p class="name">Spritz</p><div class="meta">Cocktail</div>
+            </div></div>
+            <div class="price">8€</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="itemTop">
+            <div class="left"><div class="ico">🍋</div><div class="nameWrap">
+              <p class="name">Limoncello Spritz</p><div class="meta">Cocktail</div>
+            </div></div>
+            <div class="price">8€</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="itemTop">
+            <div class="left"><div class="ico">🌿</div><div class="nameWrap">
+              <p class="name">Hugo</p><div class="meta">Cocktail</div>
+            </div></div>
+            <div class="price">8€</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== MOCKTAILS ========== -->
+    <section id="mocktails" class="reveal">
+      <div class="secHead">
+        <h2 class="secTitle">🥤 Mocktails</h2>
+        <div class="secHint">6€</div>
+      </div>
+      <div class="divider"></div>
+
+      <div class="list">
+        <div class="card">
+          <div class="itemTop">
+            <div class="left"><div class="ico">🍊</div><div class="nameWrap">
+              <p class="name">Virgin Spritz</p><div class="meta">Sans alcool</div>
+            </div></div>
+            <div class="price">6€</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="itemTop">
+            <div class="left"><div class="ico">🌿</div><div class="nameWrap">
+              <p class="name">Virgin Hugo</p><div class="meta">Sans alcool</div>
+            </div></div>
+            <div class="price">6€</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="itemTop">
+            <div class="left"><div class="ico">🍍</div><div class="nameWrap">
+              <p class="name">Bora Bora</p><div class="meta">Ananas, passion, citron, grenadine</div>
+            </div></div>
+            <div class="price">6€</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== DIGESTIFS ========== -->
+    <section id="digestifs" class="reveal">
+      <div class="secHead">
+        <h2 class="secTitle">🥃 Digestifs</h2>
+        <div class="secHint">4cl</div>
+      </div>
+      <div class="divider"></div>
+
+      <div class="card">
+        <div class="itemTop">
+          <div class="left">
+            <div class="ico">🍶</div>
+            <div class="nameWrap">
+              <p class="name">Digestifs</p>
+              <div class="meta">Get 27 • Bailey's • Limoncello</div>
+            </div>
+          </div>
+          <div class="price">7.50€</div>
+        </div>
+
+        <details>
+          <summary><span>Voir les détails</span><span class="chev">⌄</span></summary>
+          <div class="more">
+            <div class="kv"><span>🌿 Get 27</span><span>4cl • 7.50€</span></div>
+            <div class="kv"><span>🍫 Bailey's</span><span>4cl • 7.50€</span></div>
+            <div class="kv"><span>🍋 Limoncello</span><span>4cl • 7.50€</span></div>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <!-- ========== WHISKY ========== -->
+    <section id="whisky" class="reveal">
+      <div class="secHead">
+        <h2 class="secTitle">🌾 Whisky</h2>
+        <div class="secHint">4cl</div>
+      </div>
+      <div class="divider"></div>
+
+      <div class="card">
+        <div class="itemTop">
+          <div class="left">
+            <div class="ico">🥃</div>
+            <div class="nameWrap">
+              <p class="name">Sélection Whisky</p>
+              <div class="meta">Un prix est partiellement masqué sur photo</div>
+            </div>
+          </div>
+          <div class="price">7.50€ → 9.50€</div>
+        </div>
+
+        <details>
+          <summary><span>Voir la sélection</span><span class="chev">⌄</span></summary>
+          <div class="more">
+            <div class="kv"><span>🌹 Four Roses</span><span>7.50€</span></div>
+            <div class="kv"><span>🏔️ Glenlivet Founder's Reserve</span><span>9€ (à confirmer)</span></div>
+            <div class="kv"><span>🔥 Deacon (Tourbé)</span><span>9.50€</span></div>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <!-- ========== VINS ========== -->
+    <section id="vins" class="reveal">
+      <div class="secHead">
+        <h2 class="secTitle">🍷 Cave à vins</h2>
+        <div class="secHint">Verre & bouteille</div>
+      </div>
+      <div class="divider"></div>
+
+      <div class="card">
+        <div class="itemTop">
+          <div class="left">
+            <div class="ico">🍇</div>
+            <div class="nameWrap">
+              <p class="name">Vins</p>
+              <div class="meta">Rosés / Blancs / Rouges</div>
+            </div>
+          </div>
+          <div class="price">2 • 2 • 3</div>
+        </div>
+
+        <details>
+          <summary><span>Rosés (2)</span><span class="chev">⌄</span></summary>
+          <div class="more">
+            <div class="kv"><span>🌸 Pétula — AOP Luberon</span><span>5.50€ / 27€</span></div>
+            <div class="kv"><span>🌸 Sainte Marguerite — Cuvée Symphonie (AOP)</span><span>39€</span></div>
+          </div>
+        </details>
+
+        <details>
+          <summary><span>Blancs (2)</span><span class="chev">⌄</span></summary>
+          <div class="more">
+            <div class="kv"><span>🌾 Les Grains — IGP Méditerranée (Chardonnay)</span><span>5€ / 25€</span></div>
+            <div class="kv"><span>🌾 Bal des Papillons — Côte de Gascogne IGP (Horgelus)</span><span>5.50€ / 27€</span></div>
+          </div>
+        </details>
+
+        <details>
+          <summary><span>Rouges (3)</span><span class="chev">⌄</span></summary>
+          <div class="more">
+            <div class="kv"><span>🍷 Les Grains — IGP Méditerranée (Pinot Noir)</span><span>5€ / 25€</span></div>
+            <div class="kv"><span>🍷 Grand Marrenon — AOP Luberon</span><span>6€ / 30€</span></div>
+            <div class="kv"><span>🍷 Orca — AOC Ventoux (Vieille Vigne)</span><span>7€ / 35€</span></div>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <!-- ========== CHAMPAGNE ========== -->
+    <section id="champagne" class="reveal">
+      <div class="secHead">
+        <h2 class="secTitle">🥂 Champagne</h2>
+        <div class="secHint">Verre & bouteille</div>
+      </div>
+      <div class="divider"></div>
+
+      <div class="list">
+        <div class="card">
+          <div class="itemTop">
+            <div class="left"><div class="ico">🥂</div><div class="nameWrap">
+              <p class="name">Veuve de Beaumont — Brut AOP</p><div class="meta">Verre / bouteille</div>
+            </div></div>
+            <div class="price">9€ / 45€</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="itemTop">
+            <div class="left"><div class="ico">✨</div><div class="nameWrap">
+              <p class="name">Deutz — Brut</p><div class="meta">Bouteille</div>
+            </div></div>
+            <div class="price">85€</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer>© BEER'S FACTORY — Menu digital</footer>
+  </div>
+
+  <button class="toTop" id="toTop" aria-label="Retour en haut">↑</button>
+
+  <script>
+    (() => {
+      // Reveal on scroll
+      const reveals = document.querySelectorAll('.reveal');
+      const ioReveal = new IntersectionObserver((entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) {
+            e.target.classList.add('is-visible');
+            ioReveal.unobserve(e.target);
+          }
+        }
+      }, { threshold: 0.14 });
+      reveals.forEach(el => ioReveal.observe(el));
+
+      // Active category while scrolling
+      const catLinks = Array.from(document.querySelectorAll('.cat[data-target]'));
+      const sections = catLinks.map(a => document.getElementById(a.dataset.target)).filter(Boolean);
+
+      const setActive = (id) => {
+        catLinks.forEach(a => a.classList.toggle('is-active', a.dataset.target === id));
+      };
+
+      const ioActive = new IntersectionObserver((entries) => {
+        const visible = entries
+          .filter(e => e.isIntersecting)
+          .sort((a,b) => (b.intersectionRatio || 0) - (a.intersectionRatio || 0))[0];
+        if (visible?.target?.id) setActive(visible.target.id);
+      }, {
+        rootMargin: "-25% 0px -65% 0px",
+        threshold: [0.1, 0.2, 0.35, 0.5]
+      });
+
+      sections.forEach(s => ioActive.observe(s));
+
+      // Smooth click with sticky offset
+      const sticky = document.getElementById('cats');
+      const stickyH = () => (sticky ? sticky.getBoundingClientRect().height : 0);
+
+      catLinks.forEach(a => {
+        a.addEventListener('click', (ev) => {
+          ev.preventDefault();
+          const id = a.dataset.target;
+          const target = document.getElementById(id);
+          if (!target) return;
+          const y = window.scrollY + target.getBoundingClientRect().top - (stickyH() + 10);
+          window.scrollTo({ top: y, behavior: 'smooth' });
+          setActive(id);
+        });
+      });
+
+      // ToTop
+      const btn = document.getElementById('toTop');
+      const toggle = () => btn.classList.toggle('is-visible', window.scrollY > 520);
+      window.addEventListener('scroll', toggle, { passive: true });
+      toggle();
+      btn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+      // Smooth details animation
+      const allDetails = document.querySelectorAll('details');
+      allDetails.forEach(d => {
+        const summary = d.querySelector('summary');
+        const content = Array.from(d.children).find(n => n !== summary);
+        if (!summary || !content) return;
+
+        summary.addEventListener('click', (e) => {
+          if (!content.animate) return;
+          e.preventDefault();
+
+          const isOpen = d.hasAttribute('open');
+          const startHeight = d.offsetHeight;
+
+          if (!isOpen) d.setAttribute('open', '');
+          const endHeight = d.offsetHeight;
+
+          if (isOpen) d.setAttribute('open', '');
+
+          d.style.overflow = 'hidden';
+          d.style.height = startHeight + 'px';
+
+          const targetHeight = isOpen ? summary.offsetHeight : endHeight;
+
+          const anim = d.animate(
+            [{ height: startHeight + 'px' }, { height: targetHeight + 'px' }],
+            { duration: 260, easing: 'cubic-bezier(.2,.8,.2,1)' }
+          );
+
+          anim.onfinish = () => {
+            d.style.height = '';
+            d.style.overflow = '';
+            if (isOpen) d.removeAttribute('open');
+          };
+        });
+      });
+
+      if (sections[0]) setActive(sections[0].id);
+    })();
+  </script>
+</body>
+</html>
